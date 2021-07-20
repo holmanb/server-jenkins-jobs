@@ -30,7 +30,7 @@
           export https_proxy="http://squid.internal:3128"
           export no_proxy=launchpad.net
 
-          git clone https://git.launchpad.net/cloud-init
+          git clone https://github.com/canonical/cloud-init
           cd cloud-init
           tox -e tip-flake8
           tox -e tip-pylint
