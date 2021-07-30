@@ -27,4 +27,4 @@
         *** STOP ***
     properties:
       - build-discarder:
-          num-to-keep: 7
+          num-to-keep: 30
