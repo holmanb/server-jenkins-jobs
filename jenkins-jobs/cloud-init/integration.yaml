@@ -48,7 +48,6 @@
           fail: true
     publishers:
       - cloud-init-archive-integration-logs
-      - email-server-crew-qa
     builders:
       - shell:
           unstable-return: 99
