@@ -42,6 +42,9 @@
       - telegraf:
           namespaces:
             - ubuntu
+      - cassandra:
+          namespaces:
+            - ubuntu
     jobs:
       - oci-unit-{testcase}
       - oci-unit-{testcase}-standalone
