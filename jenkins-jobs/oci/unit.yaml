@@ -145,6 +145,7 @@
             set -eufx
 
             export https_proxy=http://squid.internal:3128
+            export no_proxy=launchpad.net,amazonaws.com,ecr.aws
             export AWS_PROFILE="$DOCKER_NAMESPACE"
 
             git clone --depth 1 -b "$STSBRANCH" "$STSREPO" sts
