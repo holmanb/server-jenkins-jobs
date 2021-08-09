@@ -4,7 +4,7 @@ set -e
 # Test each project on its own (plus _common):
 
 for dir in jenkins-jobs/*/;
-do 
+do
     jenkins-jobs --conf jenkins_jobs.ini test --recursive "jenkins-jobs/_common:$dir"
 done
 
