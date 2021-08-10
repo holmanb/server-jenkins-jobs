@@ -27,7 +27,7 @@
       *** STOP ***
     properties:
       - build-discarder:
-          num-to-keep: 3
+          num-to-keep: 7
     publishers:
       - email-server-crew-qa
 
