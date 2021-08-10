@@ -24,7 +24,6 @@
     release:
       - bionic
       - focal
-      - groovy
       - hirsute
       - impish
     source:
