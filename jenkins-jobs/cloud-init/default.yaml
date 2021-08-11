@@ -31,23 +31,6 @@
     publishers:
       - email-server-crew-qa
 
-- project:
-    name: cloud-init-integration-proposed
-    release:
-      - xenial
-      - bionic
-      - focal
-      - groovy
-      - hirsute
-      - impish
-    platform:
-      - ec2
-      - lxd
-      - nocloud-kvm
-    jobs:
-      - cloud-init-integration-proposed-trigger-{release}
-      - cloud-init-integration-proposed-{release}-{platform}
-
 - publisher:
     name: cloud-init-archive-results
     publishers:
