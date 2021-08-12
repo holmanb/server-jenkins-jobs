@@ -38,7 +38,7 @@
     defaults: cloud-init
     node: torkoal
     triggers:
-      - timed: '@weekly'
+      - timed: !j2: "{{ '@daily' if platform == 'lxd_container' else '@weekly' }}"
     wrappers:
       - workspace-cleanup
       - timestamps
@@ -47,6 +47,7 @@
           fail: true
     publishers:
       - cloud-init-archive-integration-logs
+      - email-table-flip
     builders:
       - shell: |
           #!/bin/bash

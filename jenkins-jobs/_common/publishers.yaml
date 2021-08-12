@@ -34,6 +34,12 @@
           recipients: server-squeaky-wheel@lists.canonical.com
 
 - publisher:
+    name: email-table-flip
+    publishers:
+      - email:
+          recipients: server-table-flip@lists.canonical.com
+
+- publisher:
     name: archive-everything
     publishers:
       - archive:
