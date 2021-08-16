@@ -21,6 +21,9 @@
       - lxd_container
       - lxd_vm
       - ec2
+      - azure
+      - gce
+      - oci
     release:
       - bionic
       - focal
