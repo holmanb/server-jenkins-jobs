@@ -50,7 +50,6 @@
           fail: true
     publishers:
       - cloud-init-archive-integration-logs
-      - email-table-flip
     builders:
       - shell: |
           #!/bin/bash
