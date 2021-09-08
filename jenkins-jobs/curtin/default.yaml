@@ -47,4 +47,4 @@
     name: email-curtin-qa
     publishers:
       - email:
-          recipients: michael.hudson@canonical.com
+          recipients: michael.hudson@canonical.com, daniel.bungert@canonical.com
