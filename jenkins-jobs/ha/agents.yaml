@@ -26,6 +26,7 @@
     cloud:
       - virsh
     test:
+      - fence_mpath
       - fence_scsi
       - fence_virsh
       - resource_ipaddr2
