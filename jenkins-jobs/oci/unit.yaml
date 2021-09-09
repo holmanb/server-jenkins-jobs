@@ -45,6 +45,7 @@
       - cassandra:
           namespaces:
             - ubuntu
+      - squid
     jobs:
       - oci-unit-{testcase}
       - oci-unit-{testcase}-standalone
