@@ -85,7 +85,7 @@
               repourl="http://archive.ubuntu.com/ubuntu"
               suite={release}-proposed
 
-              pversion=$(rmadison --suite ${release}-proposed cloud-init)
+              pversion=$(rmadison --suite {release}-proposed cloud-init)
               if [[ -z $pversion ]]; then
                   echo "No cloud-init source package found for $suite"
                   exit 0
