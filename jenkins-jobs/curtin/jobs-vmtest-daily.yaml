@@ -56,26 +56,6 @@
           release: focal
           nose_args: nose_args
 
-- job:
-    name: curtin-vmtest-daily-g
-    defaults: curtin
-    node: torkoal
-    parameters:
-      - nose-args:
-          default_nose_args:
-    triggers:
-      - timed: "H 4 * * 6"
-    publishers:
-      - email-curtin-qa
-      - curtin-archive-results
-    wrappers:
-      - timestamps
-      - workspace-cleanup
-    builders:
-      - vmtest-daily:
-          release: groovy
-          nose_args: nose_args
-
 - builder:
     name: vmtest-daily
     builders:
