@@ -41,7 +41,7 @@
     publishers:
       - archive:
           artifacts: 'output/**'
-          excludes: 'output/debug.log, **/*img'
+          excludes: 'output/debug.log, **/*.img, **/hook-hotplug-cmd'
 
 - publisher:
     name: email-curtin-qa
