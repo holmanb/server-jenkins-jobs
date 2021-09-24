@@ -38,7 +38,7 @@
     defaults: cloud-init
     node: torkoal
     triggers:
-      - timed: "@daily"
+      - timed: "@weekly"
     publishers:
       - email-server-crew-qa
       - trigger:
