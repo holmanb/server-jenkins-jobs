@@ -154,7 +154,7 @@
       - workspace-cleanup
 
 - job:
-    name: curtin-cloudinit-sru
+    name: curtin-cloud-init-sru
     defaults: curtin
     node: torkoal
     parameters:

@@ -20,4 +20,4 @@
     view-type: list
     description: |
       cloud-init unit and integration testing
-    regex: '^cloud-init-.*'
+    regex: '(.+-)?cloud-init-.*'
