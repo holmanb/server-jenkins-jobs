@@ -63,6 +63,9 @@
 
           set -eux -o pipefail
 
+          export https_proxy=http://squid.internal:3128
+          export no_proxy=launchpad.net
+
           function cleanup {{
               if [[ -n ${{container:-}} ]]; then
                   ! lxc info "$container" &>/dev/null || lxc stop "$container"
