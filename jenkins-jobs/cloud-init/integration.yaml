@@ -48,6 +48,13 @@
       - timeout:
           timeout: 180
           fail: true
+      - credentials-binding:
+          - file:
+              credential-id: gcp-application-credentials
+              variable: GOOGLE_APPLICATION_CREDENTIALS
+          - text:
+              credential-id: gcp-project
+              variable: GOOGLE_CLOUD_PROJECT
     publishers:
       - cloud-init-archive-integration-logs
     builders:
@@ -55,6 +62,9 @@
           #!/bin/bash
 
           set -eux -o pipefail
+
+          export https_proxy=http://squid.internal:3128
+          export no_proxy=launchpad.net
 
           function cleanup {{
               if [[ -n ${{container:-}} ]]; then
@@ -149,9 +159,7 @@
           export CLOUD_INIT_LOCAL_LOG_PATH
 
           cd cloud-init
-          # -vv --showlocals to show the full contents of variable in failed
-          # asserts, without ellipsis.
-          tox -e integration-tests-jenkins -- -vv --showlocals tests/integration_tests
+          tox -e integration-tests-jenkins -- -v --showlocals tests/integration_tests
 
 
 - publisher:
