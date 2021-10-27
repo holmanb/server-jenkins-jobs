@@ -107,6 +107,9 @@
     wrappers:
       - timestamps
       - workspace-cleanup
+      - timeout:
+          timeout: 60
+          fail: true
     builders:
       - vmtest-sync-images
       - shell: |
@@ -176,6 +179,9 @@
     wrappers:
       - timestamps
       - workspace-cleanup
+      - timeout:
+          timeout: 60
+          fail: true
     builders:
       - vmtest-sync-images
       - shell: |
