@@ -82,10 +82,7 @@
       - merge-proposal
     auth-token: BUILD_ME
     publishers:
-      - archive:
-          artifacts: 'output/**'
-          excludes: 'output/debug.log, **/*img'
-          allow-empty: true
+      - curtin-archive-results
       - trigger-parameterized-builds:
           - project: admin-lp-git-vote
             condition: UNSTABLE_OR_WORSE
