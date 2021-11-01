@@ -29,6 +29,7 @@
       - focal
       - hirsute
       - impish
+      - jammy
     source:
       - daily
       - proposed
