@@ -17,19 +17,28 @@
 
 - project:
     name: cloud-init-integration-pytest
+    release:
+      - bionic:
+          release-is-lts: true
+      - focal:
+          release-is-lts: true
+      - hirsute
+      - impish
+      - jammy:
+          release-is-lts: true
     platform:
       - lxd_container
       - lxd_vm
       - ec2
       - azure
       - gce
-      - oci
-    release:
-      - bionic
-      - focal
-      - hirsute
-      - impish
-      - jammy
+      - oci:
+          platform-lts-only: true
+    exclude:
+      - release-is-lts: false
+        platform-lts-only: true
+      - release: jammy
+        platform: oci
     source:
       - daily
       - proposed
