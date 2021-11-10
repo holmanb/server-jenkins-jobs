@@ -74,7 +74,7 @@
           set -eux -o pipefail
 
           export https_proxy=http://squid.internal:3128
-          export no_proxy=launchpad.net
+          export no_proxy=launchpad.net,ubuntu.com
 
           function cleanup {{
               if [[ -n ${{container:-}} ]]; then
