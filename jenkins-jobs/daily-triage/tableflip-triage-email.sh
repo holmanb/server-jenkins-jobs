@@ -23,26 +23,34 @@ github_projects=(cloud-init pycloudlib)
 ndays_new_bugs=90
 
 # GitHub usernames of team members, comma-separated for use in jq filters
-team_members="blackboxsw,TheRealFalcon,lucasmoura,mitechie,paride,orndorffgrant"
+team_members="blackboxsw,TheRealFalcon,lucasmoura,paride,orndorffgrant,renanrodrigo,CalvoM"
 
 
-# Find today's triager. On Mondays triage the weekend's bugs.
-ndays=1
-triagers=(James Lucas Chad Paride)
+# Find today's triagers.
+cloud_init_triagers=(James Chad Brett)
+ua_triagers=(Grant Lucas Renan)
 week=$(date --utc '+%-V')
 dow=$(date --utc '+%u')
-if [[ "$dow" -ge 2 && "$dow" -le 5 ]]; then
-    ndays=1
-    triager=${triagers[$((dow-2))]}
-elif [[ "$dow" -eq 1 ]]; then
-    # Mondays!
-    ndays=3
-    triager=${triagers[$((week%4 - 1))]}
-else
-    ndays=1
-    triager="nobody"
-fi
 
+# Bash is the worst...
+# The point here is to determine the current day of the year
+# excluding weekends. E.g., if day 1 is a Monday, day 5 is Friday,
+# the following Monday is day 6. We can then use this number to
+# mod by the number of triages to cycle our triagers throughout the year.
+# Sorry to anybody who might get double triage on January 1st ;)
+triager_index=$((week * 5 + dow))
+cloud_init_triager_count=${#cloud_init_triagers[@]}
+ua_triager_count=${#ua_triagers[@]}
+ndays=1
+cloud_init_triager="nobody"
+ua_triager="nobody"
+if [[ "$dow" -ge 1 && "$dow" -le 5 ]]; then
+    if [ $dow -eq 1 ]; then
+        ndays=3
+    fi
+    cloud_init_triager=${cloud_init_triagers[$((triager_index % cloud_init_triager_count))]}
+    ua_triager=${ua_triagers[$((triager_index % ua_triager_count))]}
+fi
 
 # Retrieve the bugs
 for project in "${projects[@]}"; do
@@ -87,13 +95,14 @@ done
 
 
 # Generate the email subject and <title> for the text/html email
-subject="Daily triage for: ${projects[*]} [$triager]"
+subject="Daily triage for: ${projects[*]} [$cloud_init_triager and $ua_triager]"
 
 
 # Generate the text/plain mail body
 {
     printf '# Daily bug triage for: %s\n\n' "${projects[*]}"
-    echo "Today's triager: $triager"
+    echo "Today's cloud-init triager: $cloud_init_triager"
+    echo "Today's UA triager: $ua_triager"
 
     for project in "${projects[@]}"; do
         printf '\n## %s active bugs (%s days) and New bugs (%s days)\n\n' "$project" $ndays $ndays_new_bugs
@@ -112,21 +121,6 @@ subject="Daily triage for: ${projects[*]} [$triager]"
             cat "$github_project-reviews.text"
         fi
     done
-
-    printf '\n## Schedule\n\n'
-    echo "Mon: <varies>"
-    i=0
-    for d in Tue Wed Thu Fri; do
-        echo "$d: ${triagers[$i]}"
-        i=$((i+1))
-    done
-    printf '\nMondays follow the same schedule, starting from\nthe first Monday of the year. Next Mondays:\n\n'
-    for i in {1..5}; do
-        future_date=$(date --utc --date="$i Monday" '+%b %_d')
-        future_week=$(date --utc --date="$i Monday" '+%-V')
-        future_triager=${triagers[$((future_week%4 - 1))]}
-        echo "$future_date: $future_triager"
-    done
 } > mail-body.text
 
 
@@ -136,7 +130,8 @@ subject="Daily triage for: ${projects[*]} [$triager]"
     echo "<title>$subject</title>"
     printf '</head>\n<body>\n'
     echo "<h4>Daily bug triage for: ${projects[*]}</h4>"
-    echo "Today's triager: $triager"
+    echo "Today's cloud-init triager: $cloud_init_triager"
+    echo "Today's UA triager: $ua_triager"
 
     for project in "${projects[@]}"; do
         sed 's|\(lp: #\)\([0-9][0-9]*\)|lp: <a href="https://pad.lv/\2">#\2</a>|' "$project-bugs.text" > "$project-bugs.html"
@@ -162,26 +157,6 @@ subject="Daily triage for: ${projects[*]} [$triager]"
             echo "</ul>"
         fi
     done
-
-    echo "<h5>Schedule</h5>"
-    echo "<ul>"
-    echo "<li>Mon: &lt;varies&gt;</li>"
-    i=0
-    for d in Tue Wed Thu Fri; do
-        echo "<li>$d: ${triagers[$i]}</li>"
-        i=$((i+1))
-    done
-    echo "</ul>"
-    echo "Mondays follow the same schedule, starting from the first Monday of the year. Next Mondays:"
-    echo "<ul>"
-    for i in {1..5}; do
-        future_date=$(date --utc --date="$i Monday" '+%b %_d')
-        future_week=$(date --utc --date="$i Monday" '+%-V')
-        future_triager=${triagers[$((future_week%4 - 1))]}
-        echo "<li>$future_date: $future_triager</li>"
-    done
-    echo "</ul>"
-    printf '</body>\n</html>\n'
 } > mail-body.html
 
 
