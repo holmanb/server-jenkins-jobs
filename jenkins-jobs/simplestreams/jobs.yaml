@@ -55,7 +55,7 @@
     defaults: simplestreams
     project-type: matrix
     triggers:
-      - timed: "H 23 * * *"
+      - timed: '@daily'
     wrappers:
       - timestamps
       - workspace-cleanup
