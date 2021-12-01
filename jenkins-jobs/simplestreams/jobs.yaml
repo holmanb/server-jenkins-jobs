@@ -16,23 +16,6 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 - job:
-    name: simplestreams-build
-    defaults: simplestreams
-    node: metal-amd64
-    builders:
-      - shell: |
-          #!/bin/bash -x
-          set -e
-          release=xenial
-
-          rm -rf *
-          git clone https://git.launchpad.net/simplestreams build
-          cd build
-
-          ./tools/build-deb -d -S -us -uc
-          sbuild --nolog --verbose "--dist=$release" simplestreams_*.dsc
-
-- job:
     name: simplestreams-debug
     defaults: simplestreams
     parameters:
@@ -76,11 +59,6 @@
     wrappers:
       - timestamps
       - workspace-cleanup
-    publishers:
-      - trigger:
-          project: simplestreams-build
-          threshold: FAILURE
-      - email-server-crew-qa
     axes:
       - axis:
           type: slave
