@@ -39,4 +39,4 @@
           num-to-keep: 25
     publishers:
       - email:
-          recipients: paride.legovini@canonical.com, daniel.watkins@canonical.com
+          recipients: paride.legovini@canonical.com
