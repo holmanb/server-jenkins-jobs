@@ -27,7 +27,7 @@
         *** STOP ***
     node: metal-amd64
     triggers:
-      - timed: "H * * * *"
+      - timed: '@hourly'
     wrappers:
       - workspace-cleanup
       - timestamps
