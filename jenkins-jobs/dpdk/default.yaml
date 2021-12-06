@@ -17,14 +17,7 @@
 
 - defaults:
     name: dpdk
-    description: |
-        DPDK Ubuntu Server QA Jenkins Job
-
-        *** STOP ***
-        Do NOT edit this job through the web
-        This job is managed by Jenkins Job Builder and stored on Github via the URL below:
-        https://github.com/canonical/server-jenkins-jobs
-        *** STOP ***
+    <<: *defaults-common
     properties:
       - build-discarder:
           num-to-keep: 25

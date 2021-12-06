@@ -15,16 +15,18 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-- defaults:
+- defaults: &defaults-common
     name: global
     description: |
         Ubuntu Server QA Jenkins Job
 
         *** STOP ***
-        Do NOT edit this job through the web
-        This job is managed by Jenkins Job Builder and stored on Github via the URL below:
+        Do NOT edit this job through the web!
+        This job is managed by Jenkins Job Builder and stored on GitHub via the URL below:
         https://github.com/canonical/server-jenkins-jobs
         *** STOP ***
     properties:
       - build-discarder:
           num-to-keep: 3
+    publishers:
+      - email-server-crew-qa

@@ -18,21 +18,11 @@
 
 - defaults:
     name: curtin
-    description: |
-        Curtin Ubuntu Server QA Jenkins Job
-
-        *** STOP ***
-        Do NOT edit this job through the web
-        This job is managed by Jenkins Job Builder and stored on Github via the URL below:
-        https://github.com/canonical/server-jenkins-jobs
-        *** STOP ***
+    <<: *defaults-common
     wrappers:
       - timeout:
           timeout: 960
           fail: true
-    properties:
-      - build-discarder:
-          num-to-keep: 3
     publishers:
       - email-curtin-qa
 
