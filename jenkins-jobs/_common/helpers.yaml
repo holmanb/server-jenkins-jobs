@@ -1,0 +1,41 @@
+# Ubuntu Server QA Jenkins Jobs
+# Copyright (C) 2021 Canonical Ltd.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version..
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+
+- common-shell-snippets:
+    name: common-shell-snippets
+    snippet-bash-err-retry-header: &snippet-bash-err-retry-header |
+      #!/bin/bash
+      set -ux -o pipefail
+
+      ### RETRY SCRIPT SNIPPET
+      # Recursively call the script itself (via exec) if the ERR trap is
+      # tripped. Reset the CWD to $WORKSPACE each time and clean it up.
+      # Note: this doesn't fully reset the environment and is only safe if
+      # this is the only shell builder, because of the $WORKSPACE cleanup.
+      #
+      # This hardcodes 5 retries over 30 minutes with cubic backoff.
+      retry() {{
+          ((!(rc=$?) || ${{_try:=1}}>5)) && exit $rc
+          local sleeptime="$((8*_try**3))"
+          echo "FAILURE ($rc). Will re-run script in ${{sleeptime}}s (attempt $_try/5)." >&2
+          sleep "$sleeptime"
+          [[ -n "${{WORKSPACE:-}}" ]] && cd "$WORKSPACE" && find . -delete
+          _try=$((++_try)) exec "$BASH" "${{BASH_SOURCE[-1]}}"
+      }}
+      trap retry ERR
+      ### END OF RETRY SNIPPET

@@ -18,39 +18,37 @@
 - builder:
     name: metric-influxdb
     builders:
-      - shell: |
-          #!/bin/bash
-          set -e
+      - shell: !join:
+          - "\n"
+          -
+            - *snippet-bash-err-retry-header
+            - |
+              git clone https://github.com/canonical/metrics.git
+              cd metrics
+              git clone --depth 1 lp:kpi-metrics-tools
+              set +x
+              source kpi-metrics-tools/{team}-kpi-influxdb.txt
+              set -x
 
-          retry() (for i in {{0..4}}; do sleep $((8*i**3)) && echo "Trying: ${{*:1}}" >&2 && "${{@:1}}" && break; done)
-
-          retry git clone https://github.com/canonical/metrics.git
-          cd metrics
-          retry git clone --depth 1 lp:kpi-metrics-tools
-          source kpi-metrics-tools/{team}-kpi-influxdb.txt
-
-          set -x
-          retry nc -zv "$INFLUXDB_HOSTNAME" "$INFLUXDB_PORT"
-          python3 -m metrics.{metric_module} {metric_arguments}
+              python3 -m metrics.{metric_module} {metric_arguments}
 
 - builder:
     name: autopkgtest_queues
     builders:
-      - shell: |
-          #!/bin/bash
-          set -e
+      - shell: !join:
+          - "\n"
+          -
+            - *snippet-bash-err-retry-header
+            - |
+              git clone https://github.com/canonical/metrics.git
+              cd metrics
+              git clone --depth 1 lp:kpi-metrics-tools
+              set +x
+              source kpi-metrics-tools/foundations-kpi-influxdb.txt
+              export METRICS_PROMETHEUS=10.25.2.225:9091
+              set -x
 
-          retry() (for i in {{0..4}}; do sleep $((8*i**3)) && echo "Trying: ${{*:1}}" >&2 && "${{@:1}}" && break; done)
-
-          retry git clone https://github.com/canonical/metrics.git
-          cd metrics
-          retry git clone --depth 1 lp:kpi-metrics-tools
-          source kpi-metrics-tools/foundations-kpi-influxdb.txt
-          export METRICS_PROMETHEUS=10.25.2.225:9091
-
-          set -x
-          retry nc -zv "$INFLUXDB_HOSTNAME" "$INFLUXDB_PORT"
-          python3 -m metrics.foundations_autopkgtest_queue --queues {queue_name}
+              python3 -m metrics.foundations_autopkgtest_queue --queues {queue_name}
 
 - job:
     name: metric-foundations-cloud-images
@@ -65,21 +63,20 @@
     name: metric-foundations-docker-hub-images
     defaults: metrics
     builders:
-      - shell: |
-          #!/bin/bash
-          set -e
+      - shell: !join:
+          - "\n"
+          -
+            - *snippet-bash-err-retry-header
+            - |
+              git clone https://github.com/canonical/metrics.git
+              cd metrics
+              git clone --depth 1 lp:kpi-metrics-tools
+              set +x
+              source kpi-metrics-tools/foundations-kpi-influxdb.txt
+              set -x
 
-          retry() (for i in {0..4}; do sleep $((8*i**3)) && echo "Trying: ${*:1}" >&2 && "${@:1}" && break; done)
-
-          retry git clone https://github.com/canonical/metrics.git
-          cd metrics
-          retry git clone --depth 1 lp:kpi-metrics-tools
-          source kpi-metrics-tools/foundations-kpi-influxdb.txt
-
-          set -x
-          export https_proxy=http://squid.internal:3128
-          retry nc -zv "$INFLUXDB_HOSTNAME" "$INFLUXDB_PORT"
-          python3 -m metrics.docker_hub_images
+              export https_proxy=http://squid.internal:3128
+              python3 -m metrics.docker_hub_images
 
 - job:
     name: metric-foundations-cloud-image-sizes
@@ -209,35 +206,39 @@
     name: metric-server-docker-downloads
     defaults: metrics
     builders:
-      - shell: |
-          #!/bin/bash
-          set -e
+      - shell: !join:
+          - "\n"
+          -
+            - *snippet-bash-err-retry-header
+            - |
+              git clone https://github.com/canonical/metrics.git
+              cd metrics
+              git clone --depth 1 lp:kpi-metrics-tools
+              set +x
+              source kpi-metrics-tools/server-kpi-influxdb.txt
+              set -x
 
-          git clone https://github.com/canonical/metrics.git
-          cd metrics
-          git clone --depth 1 lp:kpi-metrics-tools
-          source kpi-metrics-tools/server-kpi-influxdb.txt
-
-          set -x
-          export https_proxy=http://squid.internal:3128
-          python3 -m metrics.docker_downloads
+              export https_proxy=http://squid.internal:3128
+              python3 -m metrics.docker_downloads
 
 - job:
     name: metric-server-vagrant-downloads
     defaults: metrics
     builders:
-      - shell: |
-          #!/bin/bash
-          set -e
+      - shell: !join:
+          - "\n"
+          -
+            - *snippet-bash-err-retry-header
+            - |
+              git clone https://github.com/canonical/metrics.git
+              cd metrics
+              git clone --depth 1 lp:kpi-metrics-tools
+              set +x
+              source kpi-metrics-tools/server-kpi-influxdb.txt
+              set -x
 
-          git clone https://github.com/canonical/metrics.git
-          cd metrics
-          git clone --depth 1 lp:kpi-metrics-tools
-          source kpi-metrics-tools/server-kpi-influxdb.txt
-
-          set -x
-          export https_proxy=http://squid.internal:3128
-          python3 -m metrics.vagrant_downloads
+              export https_proxy=http://squid.internal:3128
+              python3 -m metrics.vagrant_downloads
 
 - job:
     name: metric-foundations-merges
@@ -247,6 +248,7 @@
           team: "foundations"
           metric_module: "merges"
           metric_arguments: "foundations"
+
 - job:
     name: metric-foundations-active-contributors
     defaults: metrics
@@ -255,6 +257,7 @@
           team: "foundations"
           metric_module: "foundations_active_contributors"
           metric_arguments: ""
+
 - job:
     name: metric-server-merges
     defaults: metrics
@@ -263,6 +266,7 @@
           team: "server"
           metric_module: "merges"
           metric_arguments: "server"
+
 - job:
     name: metric-openstack-merges
     defaults: metrics

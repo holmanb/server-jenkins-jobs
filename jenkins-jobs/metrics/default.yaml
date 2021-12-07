@@ -25,7 +25,7 @@
       - workspace-cleanup
       - timestamps
       - timeout:
-          timeout: 30
+          timeout: 60
           fail: true
     properties:
       - build-discarder:
