@@ -19,6 +19,7 @@
     name: ha-agents-test-common
     release:
       - impish
+      - jammy
 
 - project:
     name: ha-agents-virsh
