@@ -59,7 +59,7 @@
           metric_module: "cloud_images"
           metric_arguments: ""
 
-- job:
+- job-template:
     name: metric-foundations-docker-hub-images
     defaults: metrics
     builders:
@@ -202,7 +202,7 @@
           metric_module: "iso"
           metric_arguments: ""
 
-- job:
+- job-template:
     name: metric-server-docker-downloads
     defaults: metrics
     builders:
@@ -221,7 +221,7 @@
               export https_proxy=http://squid.internal:3128
               python3 -m metrics.docker_downloads
 
-- job:
+- job-template:
     name: metric-server-vagrant-downloads
     defaults: metrics
     builders:
@@ -338,3 +338,12 @@
           team: "foundations"
           metric_module: "foundations_retracers_avg_time"
           metric_arguments: "--environment production"
+
+# We need job-templates when we don't have template variables
+# to force the expansion of escaped braces {{ ... }}.
+- project:
+    name: metrics
+    jobs:
+      - metric-foundations-docker-hub-images
+      - metric-server-docker-downloads
+      - metric-server-vagrant-downloads
