@@ -20,8 +20,7 @@
     builders:
       - shell: !join:
           - "\n"
-          -
-            - *snippet-bash-err-retry-header
+          - - *snippet-bash-err-retry-header
             - |
               git clone https://github.com/canonical/metrics.git
               cd metrics
@@ -37,8 +36,7 @@
     builders:
       - shell: !join:
           - "\n"
-          -
-            - *snippet-bash-err-retry-header
+          - - *snippet-bash-err-retry-header
             - |
               git clone https://github.com/canonical/metrics.git
               cd metrics
@@ -65,8 +63,7 @@
     builders:
       - shell: !join:
           - "\n"
-          -
-            - *snippet-bash-err-retry-header
+          - - *snippet-bash-err-retry-header
             - |
               git clone https://github.com/canonical/metrics.git
               cd metrics
@@ -208,8 +205,7 @@
     builders:
       - shell: !join:
           - "\n"
-          -
-            - *snippet-bash-err-retry-header
+          - - *snippet-bash-err-retry-header
             - |
               git clone https://github.com/canonical/metrics.git
               cd metrics
@@ -227,8 +223,7 @@
     builders:
       - shell: !join:
           - "\n"
-          -
-            - *snippet-bash-err-retry-header
+          - - *snippet-bash-err-retry-header
             - |
               git clone https://github.com/canonical/metrics.git
               cd metrics
