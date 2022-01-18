@@ -66,6 +66,9 @@
           - text:
               credential-id: gcp-project
               variable: GOOGLE_CLOUD_PROJECT
+          - file:
+              credential-id: cloud-init-pycloudlib-config
+              variable: PYCLOUDLIB_CONFIG
     publishers:
       - cloud-init-archive-integration-logs
     builders:
