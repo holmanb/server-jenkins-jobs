@@ -23,7 +23,6 @@
           release-is-lts: true
       - focal:
           release-is-lts: true
-      - hirsute
       - impish
       - jammy:
           release-is-lts: true
@@ -35,24 +34,67 @@
       - gce
       - oci:
           platform-lts-only: true
+    source:
+      - git
+      - daily-ppa
+      - proposed
     exclude:
       - release-is-lts: false
         platform-lts-only: true
       - release: jammy
         platform: oci
-    source:
-      - daily
-      - proposed
+      - source: git
+        platform: ec2
+      - source: git
+        platform: azure
+      - source: git
+        platform: gce
+      - source: git
+        platform: oci
     jobs:
       - cloud-init-integration-{platform}-{release}-{source}
 
+- builder:
+    name: cloud-init-integration-get-source-from-git
+    builders:
+      - shell: git clone -b "$CLOUDINITBRANCH" "$CLOUDINITREPO" cloud-init
+
+- builder:
+    name: cloud-init-integration-get-source-from-daily-ppa
+    builders:
+      - shell: |
+          #!/bin/bash
+
+          set -eux -o pipefail
+
+          pull-ppa-source --ppa=cloud-init-dev/daily --no-verify-signature cloud-init {release}
+          ln -s cloud-init-*/ cloud-init
+
+- builder:
+    name: cloud-init-integration-get-source-from-archive
+    builders:
+      - shell: |
+          #!/bin/bash
+
+          set -eux -o pipefail
+
+          # When pulling from the archive pull-pkg will fetch from
+          # -proposed if the package is available there, otherwise
+          # -release will be used.
+
+          pull-lp-source cloud-init {release}
+          ln -s cloud-init-*/ cloud-init
 
 - job-template:
     name: cloud-init-integration-{platform}-{release}-{source}
     defaults: cloud-init
-    node: torkoal
     triggers:
-      - timed: !j2: "{{ '@daily' if platform == 'lxd_container' else '@weekly' }}"
+      - timed: !j2: "{{ {'git': '@daily', 'daily-ppa': '@weekly'}.get(source, '') }}"
+    parameters:
+      - git-clone-params:
+          gitproject: cloud-init
+          giturl: https://github.com/canonical/cloud-init.git
+          gitvarprefix: CLOUDINIT
     wrappers:
       - workspace-cleanup
       - timestamps
@@ -72,6 +114,26 @@
     publishers:
       - cloud-init-archive-integration-logs
     builders:
+      - conditional-step:
+          condition-kind: strings-match
+          condition-string1: '{source}'
+          condition-string2: daily-ppa
+          steps:
+            - cloud-init-integration-get-source-from-daily-ppa:
+                release: '{release}'
+      - conditional-step:
+          condition-kind: strings-match
+          condition-string1: '{source}'
+          condition-string2: proposed
+          steps:
+            - cloud-init-integration-get-source-from-archive:
+                release: '{release}'
+      - conditional-step:
+          condition-kind: strings-match
+          condition-string1: '{source}'
+          condition-string2: git
+          steps:
+            - cloud-init-integration-get-source-from-git
       - shell: |
           #!/bin/bash
 
@@ -80,101 +142,20 @@
           export https_proxy=http://squid.internal:3128
           export no_proxy=launchpad.net,ubuntu.com,canonical.com
 
-          function cleanup {{
-              if [[ -n ${{container:-}} ]]; then
-                  ! lxc info "$container" &>/dev/null || lxc stop "$container"
-              fi
-          }}
+          export CLOUD_INIT_PLATFORM={platform}
+          export CLOUD_INIT_OS_IMAGE={release}
+          export CLOUD_INIT_COLLECT_LOGS=ON_ERROR
+          export CLOUD_INIT_LOCAL_LOG_PATH="$WORKSPACE/cloud_init_test_logs"
+          export CLOUD_INIT_CLOUD_INIT_SOURCE=ppa:cloud-init-dev/daily
 
-          trap cleanup EXIT
-
-          [[ {source} == proposed ]] && proposed=1 || proposed=0
-
-          ## STEP 1: retrieve the .deb package to test ##
-
-          # Integration tests are done against the daily build of cloud-init, or against
-          # the cloud-init package in -proposed. The test suite revision should match the
-          # revision of the package under test, therefore we retrieve the source package
-          # we'll test and use its test suite. This has a slight advantage over git cloning
-          # and checking out the correct git hash/tag: it's simpler and we could in
-          # principle have d/patches fixing the test suite: using this approach they get
-          # applied.
-          #
-          # Dealing with apt repositories is not straightforward, so we just run a minimal
-          # LXD container to retrieve the package. Maybe one day [1] will come to the rescue.
-          #
-          # [1] https://github.com/chrlutz/apt-repos
-
-          if ((proposed)); then
-              repourl="http://archive.ubuntu.com/ubuntu"
-              suite={release}-proposed
-
-              pversion=$(rmadison --suite {release}-proposed cloud-init)
-              if [[ -z $pversion ]]; then
-                  echo "No cloud-init source package found for $suite"
-                  exit 0
-              fi
-          else
-              repourl="http://ppa.launchpad.net/cloud-init-dev/daily/ubuntu"
-              suite={release}
+          if [[ {source} == proposed ]]; then
+            CLOUD_INIT_CLOUD_INIT_SOURCE=PROPOSED
+          elif [[ {source} == git ]]; then
+            CLOUD_INIT_CLOUD_INIT_SOURCE=IN_PLACE
           fi
-
-          container="cii-{platform}-{release}-{source}-$BUILD_NUMBER-debretrieval"
-          # Underscores are not valid in container names
-          container=$(echo "$container" | tr -d _)
-          lxd_remote=ubuntu-minimal
-          [[ $(distro-info --devel) == {release} ]] && lxd_remote=${{lxd_remote}}-daily
-          lxc launch --quiet "$lxd_remote:{release}" "$container" --ephemeral
-          sleep 1
-          lxc exec "$container" -- cloud-init status --wait
-
-          if ((!proposed)); then
-              # Add the PPA pubkey.
-              kfile="/etc/apt/trusted.gpg.d/cloud-init-daily-ppa.gpg"
-              key="0x1ff0d8535ef7e719e5c81b9c083d06fbe4d304df"
-              keyserver="keyserver.ubuntu.com"
-              keyurl="https://${{keyserver}}/pks/lookup?op=get&search=${{key}}"
-              lxc exec "$container" -- sh -c "curl -sS '$keyurl' | gpg --dearmour --output $kfile"
-          fi
-          lxc exec "$container" -- sh -c "echo deb '$repourl $suite main' > /etc/apt/sources.list.d/cloud-init-integration.list"
-          lxc exec "$container" -- sh -c "echo deb-src '$repourl $suite main' >> /etc/apt/sources.list.d/cloud-init-integration.list"
-
-          # Download cloud-init from the just added source
-          lxc exec "$container" -- apt-get -q update
-          ubuntu_uid=$(lxc exec "$container" -- id --user ubuntu)
-          lxc exec "$container" --user "$ubuntu_uid" -- mkdir /tmp/cloud-init-src
-          lxc exec "$container" --user "$ubuntu_uid" --cwd /tmp/cloud-init-src -- apt-get -q --download-only source "cloud-init/$suite"
-          lxc file pull --recursive "$container/tmp/cloud-init-src" .
-          lxc stop "$container"
-
-          pushd cloud-init-src
-          dpkg-source -x *.dsc
-          ln -s $(realpath cloud-init*/) ../cloud-init
-          popd
-
-          ## STEP 2: run the tests ##
-
-          CLOUD_INIT_PLATFORM={platform}
-          CLOUD_INIT_OS_IMAGE={release}
-
-          if ((proposed)); then
-              CLOUD_INIT_CLOUD_INIT_SOURCE=PROPOSED
-          else
-              CLOUD_INIT_CLOUD_INIT_SOURCE=ppa:cloud-init-dev/daily
-          fi
-
-          CLOUD_INIT_COLLECT_LOGS=ON_ERROR
-          CLOUD_INIT_LOCAL_LOG_PATH="$WORKSPACE/cloud_init_test_logs"
-
-          export CLOUD_INIT_PLATFORM
-          export CLOUD_INIT_CLOUD_INIT_SOURCE
-          export CLOUD_INIT_OS_IMAGE
-          export CLOUD_INIT_COLLECT_LOGS
-          export CLOUD_INIT_LOCAL_LOG_PATH
 
           cd cloud-init
           tox -e integration-tests-jenkins -- -v --showlocals tests/integration_tests
-
 
 - publisher:
     name: cloud-init-archive-integration-logs
