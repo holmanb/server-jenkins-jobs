@@ -103,12 +103,6 @@
           fail: true
       - credentials-binding:
           - file:
-              credential-id: gcp-application-credentials
-              variable: GOOGLE_APPLICATION_CREDENTIALS
-          - text:
-              credential-id: gcp-project
-              variable: GOOGLE_CLOUD_PROJECT
-          - file:
               credential-id: cloud-init-pycloudlib-config
               variable: PYCLOUDLIB_CONFIG
     publishers:
