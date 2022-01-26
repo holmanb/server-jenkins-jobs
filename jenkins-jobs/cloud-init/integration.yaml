@@ -71,7 +71,7 @@
           ln -s cloud-init-*/ cloud-init
 
 - builder:
-    name: cloud-init-integration-get-source-from-archive
+    name: cloud-init-integration-get-source-from-proposed
     builders:
       - shell: |
           #!/bin/bash
@@ -114,26 +114,8 @@
     publishers:
       - cloud-init-archive-integration-logs
     builders:
-      - conditional-step:
-          condition-kind: strings-match
-          condition-string1: '{source}'
-          condition-string2: daily-ppa
-          steps:
-            - cloud-init-integration-get-source-from-daily-ppa:
-                release: '{release}'
-      - conditional-step:
-          condition-kind: strings-match
-          condition-string1: '{source}'
-          condition-string2: proposed
-          steps:
-            - cloud-init-integration-get-source-from-archive:
-                release: '{release}'
-      - conditional-step:
-          condition-kind: strings-match
-          condition-string1: '{source}'
-          condition-string2: git
-          steps:
-            - cloud-init-integration-get-source-from-git
+      - cloud-init-integration-get-source-from-{source}:
+          release: '{release}'
       - shell: |
           #!/bin/bash
 
