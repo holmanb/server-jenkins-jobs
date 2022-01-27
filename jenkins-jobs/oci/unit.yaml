@@ -23,7 +23,9 @@
       - lts
     testcase:
       - postgres
-      - redis
+      - redis:
+          namespaces:
+            - ubuntu
       - mysql
       - nginx
       - prometheus:
