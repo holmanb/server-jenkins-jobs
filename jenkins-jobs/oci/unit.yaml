@@ -49,6 +49,9 @@
           namespaces:
             - ubuntu
       - squid
+      - bind9:
+          namespaces:
+            - ubuntu
     jobs:
       - oci-unit-{testcase}
       - oci-unit-{testcase}-standalone
