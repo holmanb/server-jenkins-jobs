@@ -35,7 +35,6 @@
       - oci:
           platform-lts-only: true
     source:
-      - git
       - daily-ppa
       - proposed
     exclude:
@@ -43,21 +42,8 @@
         platform-lts-only: true
       - release: jammy
         platform: oci
-      - source: git
-        platform: ec2
-      - source: git
-        platform: azure
-      - source: git
-        platform: gce
-      - source: git
-        platform: oci
     jobs:
       - cloud-init-integration-{platform}-{release}-{source}
-
-- builder:
-    name: cloud-init-integration-get-source-from-git
-    builders:
-      - shell: git clone -b "$CLOUDINITBRANCH" "$CLOUDINITREPO" cloud-init
 
 - builder:
     name: cloud-init-integration-get-source-from-daily-ppa
@@ -90,11 +76,6 @@
     defaults: cloud-init
     triggers:
       - timed: !j2: "{{ {'git': '@daily', 'daily-ppa': '@weekly'}.get(source, '') }}"
-    parameters:
-      - git-clone-params:
-          gitproject: cloud-init
-          giturl: https://github.com/canonical/cloud-init.git
-          gitvarprefix: CLOUDINIT
     wrappers:
       - workspace-cleanup
       - timestamps
@@ -126,8 +107,6 @@
 
           if [[ {source} == proposed ]]; then
             CLOUD_INIT_CLOUD_INIT_SOURCE=PROPOSED
-          elif [[ {source} == git ]]; then
-            CLOUD_INIT_CLOUD_INIT_SOURCE=IN_PLACE
           fi
 
           cd cloud-init
