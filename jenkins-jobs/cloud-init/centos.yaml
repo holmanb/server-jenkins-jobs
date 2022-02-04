@@ -84,14 +84,24 @@
           for i in 0 5m 30m 1h; do sleep $i; $retry_cmd && s=0 && break || s=$?; done; (exit $s)
 
 - job:
-    name: cloud-init-copr-test
+    name: cloud-init-copr-test-centos-stream-9
     defaults: cloud-init
     node: torkoal
     wrappers:
       - workspace-cleanup
     builders:
       - copr-test:
-          centos_version: 8
+          centos_version: 9-Stream
+
+- job:
+    name: cloud-init-copr-test-centos-stream-8
+    defaults: cloud-init
+    node: torkoal
+    wrappers:
+      - workspace-cleanup
+    builders:
+      - copr-test:
+          centos_version: 8-Stream
 
 - job:
     name: cloud-init-copr-test-stable-19.4
